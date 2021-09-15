@@ -143,10 +143,15 @@ if __name__ == "__main__":
 
     handlers.append(
         (r'/apidocs', tornado.web.RedirectHandler, {"url": "/apidocs/"}))
+<<<<<<< HEAD
 
     apidocs_path = Path(__file__).parent.joinpath('apidocs').resolve()
     handlers.append(
         (r'/apidocs/(.*)', tornado.web.StaticFileHandler, {'path': str(apidocs_path), "default_filename": "index.html"}))
+=======
+    handlers.append(
+        (r'/apidocs/(.*)', tornado.web.StaticFileHandler, {'path': 'webservice/apidocs', "default_filename": "index.html"}))
+>>>>>>> master
 
     if staticEnabled:
         handlers.append(
