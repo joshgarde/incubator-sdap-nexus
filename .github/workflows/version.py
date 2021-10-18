@@ -3,7 +3,7 @@ import argparse
 import os
 import re
 
-version_regex = re.compile('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((-alpha.(?P<alpha_num>\d+))|(\+(?P<commit>.*)))?')
+version_regex = re.compile('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((-alpha.(?P<alpha_num>\d+))|(-(?P<commit>.*)))?')
 
 def main():
     parser = argparse.ArgumentParser()
@@ -40,7 +40,7 @@ def bump_version(version, phase, value):
         if value == 'auto':
             raise Exception('value cannot be auto on pre-alpha')
 
-        return f'{major}.{minor}.{patch}+{value}'
+        return f'{major}.{minor}.{patch}-{value}'
     elif phase == 'alpha':
         alpha_num = 0 if version.group('alpha_num') == None else version.group('alpha_num') + 1
 
