@@ -66,7 +66,7 @@ jobs:
         if [ $ANALYSIS_COMMITS -gt 0 ]; then
           python3 .github/workflows/version.py data-access/VERSION.txt pre-alpha $(git rev-parse --short ${GITHUB_SHA})
         fi
-        python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt pre-alpha $(git rev-parse --short ${GITHUB_SHA})
+        DOCKER_VERSION=python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt pre-alpha $(git rev-parse --short ${GITHUB_SHA})
     - name: Bump alpha version
       if: ${{ github.ref == 'refs/heads/develop' }}
       run: |
@@ -76,7 +76,7 @@ jobs:
         if [ $ANALYSIS_COMMITS -gt 0 ]; then
           python3 .github/workflows/version.py data-access/VERSION.txt alpha
         fi
-        python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt alpha
+        DOCKER_VERSION=python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt alpha
     - name: Bump release version
       if: ${{ github.ref == 'refs/heads/master' }}
       run: |
@@ -100,4 +100,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: user/app:latest
+        file: 'docker/nexus-webapp/Dockerfile'
+        tags: nexusjpl/nexus-webapp:distributed.${{ DOCKER_VERSION }}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import re
 
 version_regex = re.compile('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((-alpha.(?P<alpha_num>\d+))|(\+(?P<commit>.*)))?')
@@ -23,7 +24,7 @@ def main():
     new_version = bump_version(current_version, args.phase, args.value)
     version_contents, _ = version_regex.subn(new_version, version_contents, count=1)
 
-    print(f'{args.file}: Bumping from {current_version[0]} -> {new_version}')
+    print(new_version)
 
     version_file.seek(0)
     version_file.write(version_contents)
