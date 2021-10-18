@@ -101,4 +101,4 @@ jobs:
       with:
         push: true
         file: 'docker/nexus-webapp/Dockerfile'
-        tags: nexusjpl/nexus-webapp:distributed.$DATA_ACCESS_COMMITS
+        tags: nexusjpl/nexus-webapp:distributed.${{ env.DOCKER_VERSION }}
