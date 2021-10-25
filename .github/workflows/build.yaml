@@ -48,7 +48,7 @@ jobs:
         pytest analysis/tests/
         pytest data-access/tests/
     - name: Get module commits relative to develop
-      if: ${{ startsWith(github.ref, 'refs/heads/feature/') }}
+      if: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/master' }}
       run: |
         BRANCH=origin/develop
         echo "DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')" >> $GITHUB_ENV
@@ -59,8 +59,14 @@ jobs:
         BRANCH=origin/master
         echo "DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')" >> $GITHUB_ENV
         echo "ANALYSIS_COMMITS=$(git rev-list $BRANCH -- analysis| wc -l | awk '{print $1}')" >> $GITHUB_ENV
+    - name: Get module commits relative to latest tag
+      if: ${{ github.ref == 'refs/heads/master' }}
+      run: |
+        BRANCH=$(git describe --tags --abbrev=0)
+        echo "DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')" >> $GITHUB_ENV
+        echo "ANALYSIS_COMMITS=$(git rev-list $BRANCH -- analysis| wc -l | awk '{print $1}')" >> $GITHUB_ENV
     - name: Bump pre-alpha version
-      if: ${{ startsWith(github.ref, 'refs/heads/feature/') }}
+      if: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/master' }}
       run: |
         if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
           echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
