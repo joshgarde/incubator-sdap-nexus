@@ -88,12 +88,12 @@ jobs:
     - name: Bump versions
       id: bump_versions
       run: |
-        if [ ${{steps.get_module_commits.data_access_commits}} -gt 0 ]; then
+        if [ ${{steps.get_module_commits.outputs.data_access_commits}} -gt 0 ]; then
           DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase $PHASE --value $VALUE)
         else
           DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)
         fi
-        if [ ${{steps.get_module_commits.analysis_commits}} -gt 0 ]; then
+        if [ ${{steps.get_module_commits.outputs.analysis_commits}} -gt 0 ]; then
           ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase $PHASE --value $VALUE)
         else
           ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)
@@ -115,8 +115,8 @@ jobs:
       run: |
         git config --global user.name 'sdap-nexus bot'
         git config --global user.email 'sdap-nexus@noreply.github.com'
-        git commit -am "/version ${{steps.bump_versions.docker_version}}"
-        git tag -a "distributed.${{steps.bump_versions.docker_version}}" -m "Version ${{steps.bump_versions.docker_version}}"
+        git commit -am "/version ${{steps.bump_versions.outputs.docker_version}}"
+        git tag -a "distributed.${{steps.bump_versions.outputs.docker_version}}" -m "Version ${{steps.bump_versions.outputs.docker_version}}"
         git push origin
         git push origin "distributed.$DOCKER_VERSION"
     - name: Log in to the Container registry
