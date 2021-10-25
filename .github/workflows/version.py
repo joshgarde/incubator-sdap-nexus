@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import os
 import re
 
-version_regex = re.compile('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((-alpha.(?P<alpha_num>\d+))|(-(?P<commit>.*)))?')
+version_regex = re.compile('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((-alpha\.(?P<alpha_num>\d+))|(-(?P<commit>.*)))?')
 
 def main():
     parser = ArgumentParser()
@@ -48,7 +48,7 @@ def bump_version(version, phase, value):
     elif phase == 'alpha':
         alpha_num = 0 if version.group('alpha_num') == None else version.group('alpha_num') + 1
 
-        return f'{major}.{minor}.{patch}.alpha{alpha_num}'
+        return f'{major}.{minor}.{patch}-alpha.{alpha_num}'
     elif phase == 'patch':
         patch = patch + 1 if value == 'auto' else value
 

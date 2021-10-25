@@ -106,12 +106,17 @@ jobs:
         echo "data-access: $DATA_ACCESS_VERSION"
         echo "analysis: $ANALYSIS_VERSION"
         echo "docker: $DOCKER_VERSION"
-    - name: Commit version bump
+    - name: Commit version bump + tag
+      if: |
+        github.ref == 'refs/heads/develop' ||
+        github.ref == 'refs/heads/main'    ||
+        startsWith(github.ref, 'refs/heads/release')
       run: |
         git config --global user.name 'l2ss-py bot'
         git config --global user.email 'l2ss-py@noreply.github.com'
         git add analysis/VERSION.txt data-access/VERSION.txt docker/nexus-webapp/VERSION.txt
-        git commit -m "/version $(date -uIseconds)"
+        git commit -m "/version $DOCKER_VERSION"
+        git tag -a "$DOCKER_VERSION" -m "Version $DOCKER_VERSION"
         git push
     - name: Log in to the Container registry
       uses: docker/login-action@v1
