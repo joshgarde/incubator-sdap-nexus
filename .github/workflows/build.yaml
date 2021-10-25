@@ -117,7 +117,7 @@ jobs:
         git add analysis/VERSION.txt data-access/VERSION.txt docker/nexus-webapp/VERSION.txt
         git commit -m "/version $DOCKER_VERSION"
         git tag -a "$DOCKER_VERSION" -m "Version $DOCKER_VERSION"
-        git push
+        git push origin "$DOCKER_VERSION"
     - name: Log in to the Container registry
       uses: docker/login-action@v1
       with:
