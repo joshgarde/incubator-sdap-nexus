@@ -50,68 +50,63 @@ jobs:
     - name: Get module commits relative to develop
       if: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/master' }}
       run: |
-        BRANCH=origin/develop
-        echo "DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')" >> $GITHUB_ENV
-        echo "ANALYSIS_COMMITS=$(git rev-list $BRANCH -- analysis| wc -l | awk '{print $1}')" >> $GITHUB_ENV
+        echo "BRANCH=origin/develop" >> $GITHUB_ENV
     - name: Get module commits relative to master
       if: ${{ github.ref == 'refs/heads/develop' }}
       run: |
-        BRANCH=origin/master
-        echo "DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')" >> $GITHUB_ENV
-        echo "ANALYSIS_COMMITS=$(git rev-list $BRANCH -- analysis| wc -l | awk '{print $1}')" >> $GITHUB_ENV
+        echo "BRANCH=origin/master" >> $GITHUB_ENV
     - name: Get module commits relative to latest tag
       if: ${{ github.ref == 'refs/heads/master' }}
       run: |
-        BRANCH=$(git describe --tags --abbrev=0)
+        echo "BRANCH=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
+    - name: Get module commits
+      id: get_module_commits
+      run: |
         echo "DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')" >> $GITHUB_ENV
         echo "ANALYSIS_COMMITS=$(git rev-list $BRANCH -- analysis| wc -l | awk '{print $1}')" >> $GITHUB_ENV
+
+        echo "::debug::data-access commits: $DATA_ACCESS_COMMITS"
+        echo "::debug::analysis commits: $ANALYSIS_COMMITS"
+
+        # Set output incase other steps/jobs require this info
+        echo "::set-output name=data_access_commits::$DATA_ACCESS_COMMITS"
+        echo "::set-output name=analysis_commits::$ANALYSIS_COMMITS"
     - name: Bump pre-alpha version
       if: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/master' }}
       run: |
-        if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
-          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
-        else
-          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)" >> $GITHUB_ENV
-        fi
-        if [ $ANALYSIS_COMMITS -gt 0 ]; then
-          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
-        else
-          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)" >> $GITHUB_ENV
-        fi
-        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
+        echo "PHASE=pre-alpha" >> $GITHUB_ENV
+        echo "VALUE=$(git rev-parse --short ${GITHUB_SHA})" >> $GITHUB_ENV
     - name: Bump alpha version
       if: ${{ github.ref == 'refs/heads/develop' }}
       run: |
-        if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
-          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase alpha)" >> $GITHUB_ENV
-        else
-          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)" >> $GITHUB_ENV
-        fi
-        if [ $ANALYSIS_COMMITS -gt 0 ]; then
-          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase alpha)" >> $GITHUB_ENV
-        else
-          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)" >> $GITHUB_ENV
-        fi
-        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase alpha)" >> $GITHUB_ENV
+        echo "PHASE=alpha" >> $GITHUB_ENV
+        echo "VALUE=auto" >> $GITHUB_ENV
     - name: Bump release version
       if: ${{ github.ref == 'refs/heads/master' }}
       run: |
+        echo "PHASE=patch" >> $GITHUB_ENV
+        echo "VALUE=auto" >> $GITHUB_ENV
+    - name: Bump versions
+      run: |
         if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
-          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase patch)" >> $GITHUB_ENV
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase $PHASE --value $VALUE)" >> $GITHUB_ENV
         else
           echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)" >> $GITHUB_ENV
         fi
         if [ $ANALYSIS_COMMITS -gt 0 ]; then
-          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase patch)" >> $GITHUB_ENV
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase $PHASE --value $VALUE)" >> $GITHUB_ENV
         else
           echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)" >> $GITHUB_ENV
         fi
-        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase patch)" >> $GITHUB_ENV
-    - name: Output version numbers
-      run: |
+        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase $PHASE --value $VALUE)" >> $GITHUB_ENV
+
         echo "data-access: $DATA_ACCESS_VERSION"
         echo "analysis: $ANALYSIS_VERSION"
         echo "docker: $DOCKER_VERSION"
+
+        echo "::set-output name=data_access_version::$DATA_ACCESS_VERSION"
+        echo "::set-output name=analysis_version::$ANALYSIS_VERSION"
+        echo "::set-output name=docker_version::$DOCKER_VERSION"
     - name: Commit version bump + tag
       if: |
         github.ref == 'refs/heads/develop' ||
