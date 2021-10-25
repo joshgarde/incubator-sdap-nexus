@@ -118,7 +118,7 @@ jobs:
         git commit -am "/version ${{steps.bump_versions.outputs.docker_version}}"
         git tag -a "distributed.${{steps.bump_versions.outputs.docker_version}}" -m "Version ${{steps.bump_versions.outputs.docker_version}}"
         git push origin
-        git push origin "distributed.$DOCKER_VERSION"
+        git push origin "distributed.${{steps.bump_versions.outputs.docker_version}}"
     - name: Log in to the Container registry
       uses: docker/login-action@v1
       with:
