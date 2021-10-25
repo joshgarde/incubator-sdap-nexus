@@ -65,8 +65,8 @@ jobs:
         DATA_ACCESS_COMMITS=$(git rev-list $BRANCH -- data-access| wc -l | awk '{print $1}')
         ANALYSIS_COMMITS=$(git rev-list $BRANCH -- analysis| wc -l | awk '{print $1}')
 
-        echo "::debug::data-access commits: $DATA_ACCESS_COMMITS"
-        echo "::debug::analysis commits: $ANALYSIS_COMMITS"
+        echo "data-access commits: $DATA_ACCESS_COMMITS"
+        echo "analysis commits: $ANALYSIS_COMMITS"
 
         echo "::set-output name=data_access_commits::$DATA_ACCESS_COMMITS"
         echo "::set-output name=analysis_commits::$ANALYSIS_COMMITS"
@@ -100,9 +100,9 @@ jobs:
         fi
         DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase $PHASE --value $VALUE)
 
-        echo "::debug::data-access: $DATA_ACCESS_VERSION"
-        echo "::debug::analysis: $ANALYSIS_VERSION"
-        echo "::debug::docker: $DOCKER_VERSION"
+        echo "data-access: $DATA_ACCESS_VERSION"
+        echo "analysis: $ANALYSIS_VERSION"
+        echo "docker: $DOCKER_VERSION"
 
         echo "::set-output name=data_access_version::$DATA_ACCESS_VERSION"
         echo "::set-output name=analysis_version::$ANALYSIS_VERSION"
