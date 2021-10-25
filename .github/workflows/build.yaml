@@ -30,7 +30,7 @@ jobs:
       shell: bash -ieo pipefail {0}
       run: |
         conda activate sdap-nexus
-        conda install -yq pylint flake8 pytest
+        conda install -qy pylint flake8 pytest
     - name: Lint
       shell: bash -ieo pipefail {0}
       continue-on-error: true
@@ -118,7 +118,7 @@ jobs:
         git commit -m "/version $DOCKER_VERSION"
         git tag -a "distributed.$DOCKER_VERSION" -m "Version $DOCKER_VERSION"
         git push origin
-        git push origin "$DOCKER_VERSION"
+        git push origin "distributed.$DOCKER_VERSION"
     - name: Log in to the Container registry
       uses: docker/login-action@v1
       with:
