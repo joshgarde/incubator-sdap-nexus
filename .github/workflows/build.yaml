@@ -45,8 +45,8 @@ jobs:
       shell: bash -ieo pipefail {0}
       run: |
         conda activate sdap-nexus
-        pytest --junitxml=build/reports/pytest-analysis.xml analysis/tests/
-        pytest --junitxml=build/reports/pytest-data-access.xml data-access/tests/
+        pytest analysis/tests/
+        pytest data-access/tests/
     - name: Get module commits relative to develop
       if: ${{ startsWith(github.ref, 'refs/heads/feature/') }}
       run: |
@@ -63,28 +63,49 @@ jobs:
       if: ${{ startsWith(github.ref, 'refs/heads/feature/') }}
       run: |
         if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
-          python3 .github/workflows/version.py analysis/VERSION.txt pre-alpha $(git rev-parse --short ${GITHUB_SHA})
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
+        else
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)" >> $GITHUB_ENV
         fi
         if [ $ANALYSIS_COMMITS -gt 0 ]; then
-          python3 .github/workflows/version.py data-access/VERSION.txt pre-alpha $(git rev-parse --short ${GITHUB_SHA})
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
+        else
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)" >> $GITHUB_ENV
         fi
-        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt pre-alpha $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
+        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase pre-alpha --value $(git rev-parse --short ${GITHUB_SHA}))" >> $GITHUB_ENV
     - name: Bump alpha version
       if: ${{ github.ref == 'refs/heads/develop' }}
       run: |
         if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
-          python3 .github/workflows/version.py analysis/VERSION.txt alpha
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase alpha)" >> $GITHUB_ENV
+        else
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)" >> $GITHUB_ENV
         fi
         if [ $ANALYSIS_COMMITS -gt 0 ]; then
-          python3 .github/workflows/version.py data-access/VERSION.txt alpha
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase alpha)" >> $GITHUB_ENV
+        else
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)" >> $GITHUB_ENV
         fi
-        DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt alpha)
+        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase alpha)" >> $GITHUB_ENV
     - name: Bump release version
       if: ${{ github.ref == 'refs/heads/master' }}
       run: |
-        python3 .github/workflows/version.py analysis/VERSION.txt patch
-        python3 .github/workflows/version.py data-access/VERSION.txt patch
-        python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt patch
+        if [ $DATA_ACCESS_COMMITS -gt 0 ]; then
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt --phase patch)" >> $GITHUB_ENV
+        else
+          echo "DATA_ACCESS_VERSION=$(python3 .github/workflows/version.py data-access/VERSION.txt)" >> $GITHUB_ENV
+        fi
+        if [ $ANALYSIS_COMMITS -gt 0 ]; then
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt --phase patch)" >> $GITHUB_ENV
+        else
+          echo "ANALYSIS_VERSION=$(python3 .github/workflows/version.py analysis/VERSION.txt)" >> $GITHUB_ENV
+        fi
+        echo "DOCKER_VERSION=$(python3 .github/workflows/version.py docker/nexus-webapp/VERSION.txt --phase patch)" >> $GITHUB_ENV
+    - name: Output version numbers
+      run: |
+        echo "data-access: $DATA_ACCESS_VERSION"
+        echo "analysis: $ANALYSIS_VERSION"
+        echo "docker: $DOCKER_VERSION"
     - name: Commit version bump
       run: |
         git config --global user.name 'l2ss-py bot'

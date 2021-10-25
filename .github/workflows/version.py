@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-import argparse
+from argparse import ArgumentParser
 import os
 import re
 
 version_regex = re.compile('(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)((-alpha.(?P<alpha_num>\d+))|(-(?P<commit>.*)))?')
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument('file')
-    parser.add_argument('phase')
-    parser.add_argument('value', default='auto')
+    parser.add_argument('--phase', default='current')
+    parser.add_argument('--value', default='auto')
 
     args = parser.parse_args()
 
@@ -20,6 +20,10 @@ def main():
     if current_version == None:
         print('Version not found in file')
         exit(1)
+
+    if args.phase == 'current':
+        print(current_version.group(0))
+        return
 
     new_version = bump_version(current_version, args.phase, args.value)
     version_contents, _ = version_regex.subn(new_version, version_contents, count=1)
