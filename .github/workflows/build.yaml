@@ -130,4 +130,4 @@ jobs:
       with:
         push: true
         file: 'docker/nexus-webapp/Dockerfile'
-        tags: nexusjpl/nexus-webapp:distributed.${{ env.DOCKER_VERSION }}
+        tags: nexusjpl/nexus-webapp:distributed.${{ steps.bump_versions.outputs.docker_version }}
