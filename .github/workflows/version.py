@@ -36,9 +36,9 @@ def main():
     version_file.close()
 
 def bump_version(version, phase, value):
-    major = version.group('major')
-    minor = version.group('minor')
-    patch = version.group('patch')
+    major = int(version.group('major'))
+    minor = int(version.group('minor'))
+    patch = int(version.group('patch'))
 
     if phase == 'pre-alpha':
         if value == 'auto':
@@ -46,7 +46,7 @@ def bump_version(version, phase, value):
 
         return f'{major}.{minor}.{patch}-{value}'
     elif phase == 'alpha':
-        alpha_num = 0 if version.group('alpha_num') == None else version.group('alpha_num') + 1
+        alpha_num = 0 if version.group('alpha_num') == None else int(version.group('alpha_num')) + 1
 
         return f'{major}.{minor}.{patch}-alpha.{alpha_num}'
     elif phase == 'patch':
